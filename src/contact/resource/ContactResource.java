@@ -19,6 +19,7 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
@@ -54,7 +55,10 @@ public class ContactResource {
 	@Produces(MediaType.APPLICATION_XML)
 	public Response getContactById( @PathParam("id") long id ) {
         Contact contact = dao.find(id);
-        return Response.ok(contact).build(); 
+        if(contact != null)
+        	return Response.ok(contact).build();
+        else 
+        	return Response.status(Status.NOT_FOUND).build();
     }
 	
 	/**
@@ -64,7 +68,10 @@ public class ContactResource {
 	 */
 	public Response getContacts(){
 		List<Contact> contacts = dao.findAll();
-		return Response.ok(new GenericEntity<List<Contact>>(contacts){}).build();
+		if(contacts != null)
+			return Response.ok(new GenericEntity<List<Contact>>(contacts){}).build();
+		else
+			return Response.status(Status.NOT_FOUND).build();
 	}
 	
 	/**
@@ -88,6 +95,9 @@ public class ContactResource {
 			}
 		}
 		
+		if(contactList2.size()==0)
+			return Response.status(Status.NOT_FOUND).build();
+		
 		return Response.ok(new GenericEntity<List<Contact>>(contactList2){}).build();
 		
 	}
@@ -105,12 +115,14 @@ public class ContactResource {
 	@Consumes( MediaType.APPLICATION_XML ) 
 	public Response post(JAXBElement<Contact> element, @Context UriInfo uriInfo )
 	{
-
 		Contact contact = element.getValue();
+		if( dao.find(contact.getId()) != null ){
+			return Response.status(Status.CONFLICT).build();
+		}
 		dao.save( contact );
-		URI uri = uriInfo.getAbsolutePath();
+		UriBuilder uri = uriInfo.getAbsolutePathBuilder();
 
-		return Response.created(uri).build();
+		return Response.created(uri.path(contact.getId()+"").build()).build();
 	}
 	
 	/**
@@ -142,8 +154,13 @@ public class ContactResource {
 	 */
 	@DELETE
 	@Path("{id}")
-	public void deleteContact( @PathParam("id") long id ){
+	public Response deleteContact( @PathParam("id") long id ){
 		dao.delete(id);
+		if(dao.find(id)!=null){
+			return Response.ok().build();
+		}
+		
+		return Response.status(Status.NOT_FOUND).build();
 	}
 	
 }
