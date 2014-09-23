@@ -53,10 +53,6 @@ public class MemDaoFactory extends DaoFactory {
 	
 	@Override
 	public void shutdown() {
-		//TODO here's your chance to show your skill!
-		// Use JAXB to write all your contacts to a file on disk.
-		// Then recreate them the next time a MemFactoryDao and ContactDao are created.
-		
 		List<Contact> contacts = daoInstance.findAll();
 		ContactXml exportContacts = new ContactXml();
 		exportContacts.setContacts( contacts );
