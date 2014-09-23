@@ -1,27 +1,31 @@
 package contact.service;
 
-/**
- * Manage instances of Data Access Objects (DAO) used in the app.
- * This enables you to change the implementation of the actual ContactDao
- * without changing the rest of your application.
- * 
- * @author jim
- */
-public class DaoFactory {
-	// singleton instance of this factory
+public abstract class DaoFactory {
+
 	private static DaoFactory factory;
-	private ContactDao daoInstance;
-	
-	private DaoFactory() {
-		daoInstance = new ContactDao();
-	}
-	
+	protected ContactDao daoInstance;
+
 	public static DaoFactory getInstance() {
-		if (factory == null) factory = new DaoFactory();
+		if (factory == null) factory = new contact.service.jpa.JpaDaoFactory();
 		return factory;
 	}
+
+	/**
+	 * Get an instance of a data access object for Contact objects.
+	 * Subclasses of the base DaoFactory class must provide a concrete
+	 * instance of this method that returns a ContactDao suitable
+	 * for their persistence framework.
+	 * @return instance of Contact's DAO
+	 */
+	public abstract ContactDao getContactDao();
 	
-	public ContactDao getContactDao() {
-		return daoInstance;
-	}
+	/**
+	 * Shutdown all persistence services.
+	 * This method gives the persistence framework a chance to
+	 * gracefully save data and close databases before the
+	 * application terminates.
+	 */
+	public abstract void shutdown();
+
+
 }

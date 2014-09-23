@@ -25,7 +25,7 @@ import javax.xml.bind.JAXBElement;
 
 import contact.entity.Contact;
 import contact.service.ContactDao;
-import contact.service.DaoFactory;
+import contact.service.mem.MemDaoFactory;
 
 /**
  * ContactResource provides RESTful web resources using JAX-RS
@@ -38,7 +38,7 @@ import contact.service.DaoFactory;
 @Path("/contacts")
 public class ContactResource {
 	
-	private ContactDao dao = DaoFactory.getInstance().getContactDao();
+	private ContactDao dao = MemDaoFactory.getInstance().getContactDao();
 	
 	public ContactResource() {
 		
@@ -82,7 +82,7 @@ public class ContactResource {
 	 */
 	@GET
 	@Produces(MediaType.APPLICATION_XML)
-	public Response getContactByTitle( @QueryParam("q") String title ){
+	public Response getContactByTitle( @QueryParam("title") String title ){
 		if(title==null){
 			return getContacts();
 		}

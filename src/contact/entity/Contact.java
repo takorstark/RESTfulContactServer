@@ -103,11 +103,15 @@ public class Contact implements Serializable {
 		if (update.getId() != 0 && update.getId() != this.getId() )
 			throw new IllegalArgumentException("Update contact must have same id as contact to update");
 		// Since title is used to display contacts, don't allow empty title
-		if (! isEmpty( update.getTitle()) ) this.setTitle(update.getTitle()); // empty nickname is ok
+		if (! isEmpty( update.getTitle()) ) this.setTitle(update.getTitle());// empty nickname is ok
+		else this.setTitle("");
 		// other attributes: allow an empty string as a way of deleting an attribute in update (this is hacky)
 		if (update.getName() != null ) this.setName(update.getName()); 
+		else this.setName("");
 		if (update.getEmail() != null) this.setEmail(update.getEmail());
+		else this.setEmail("");
 		if (update.getPhotoUrl() != null) this.setPhotoUrl(update.getPhotoUrl());
+		else this.setPhotoUrl("");
 	}
 	
 	/**
