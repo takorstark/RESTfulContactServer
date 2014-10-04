@@ -60,7 +60,7 @@ public class MemDaoFactory extends DaoFactory {
 		JAXBContext ctx;
 		try {
 			ctx = JAXBContext.newInstance( ContactXml.class ); 
-			File outputFile = new File( "/tmp/ContactsSevicePersistence.xml" );
+			File outputFile = new File( "ContactsServicePersistence.xml" );
 			Marshaller marshaller = ctx.createMarshaller();	
 			marshaller.marshal( exportContacts, outputFile );
 		} catch (JAXBException e) {

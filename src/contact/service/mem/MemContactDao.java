@@ -36,7 +36,7 @@ public class MemContactDao implements ContactDao {
 		try {
 			ContactXml inputContacts = new ContactXml();
 			JAXBContext context = JAXBContext.newInstance( ContactXml.class ) ;
-			File inputFile = new File( "/tmp/ContactsSevicePersistence.xml" );
+			File inputFile = new File( "ContactsServicePersistence.xml" );
 			Unmarshaller unmarshaller = context.createUnmarshaller();	
 			inputContacts = (ContactXml) unmarshaller.unmarshal( inputFile );
 			if ( inputContacts.getContacts() == null ) {

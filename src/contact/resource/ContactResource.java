@@ -8,16 +8,21 @@ import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -25,7 +30,7 @@ import javax.xml.bind.JAXBElement;
 
 import contact.entity.Contact;
 import contact.service.ContactDao;
-import contact.service.mem.MemDaoFactory;
+import contact.service.jpa.JpaDaoFactory;
 
 /**
  * ContactResource provides RESTful web resources using JAX-RS
@@ -38,10 +43,12 @@ import contact.service.mem.MemDaoFactory;
 @Path("/contacts")
 public class ContactResource {
 	
-	private ContactDao dao = MemDaoFactory.getInstance().getContactDao();
-	
+	private ContactDao dao = JpaDaoFactory.getInstance().getContactDao();
+	private CacheControl cc;
 	public ContactResource() {
-		
+		cc = new CacheControl();
+		cc.setMaxAge(84600);
+		cc.setPrivate(true);
 	}
 	
 	/**
@@ -53,10 +60,20 @@ public class ContactResource {
 	@GET
 	@Path("{id}")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response getContactById( @PathParam("id") long id ) {
+	public Response getContactById( @PathParam("id") long id, @Context Request request) {
         Contact contact = dao.find(id);
-        if(contact != null)
-        	return Response.ok(contact).build();
+        if(contact != null){
+        	EntityTag etag = new EntityTag(contact.hashCode()+"");
+        	ResponseBuilder builder = request.evaluatePreconditions(etag);
+        	
+        	 if(builder == null){
+                 builder = Response.ok(contact);
+                 builder.tag(etag);
+        	 }
+        	
+        	 builder.cacheControl(cc);
+             return builder.build();
+        }
         else 
         	return Response.status(Status.NOT_FOUND).build();
     }
@@ -113,7 +130,7 @@ public class ContactResource {
 	 */
 	@POST
 	@Consumes( MediaType.APPLICATION_XML ) 
-	public Response post(JAXBElement<Contact> element, @Context UriInfo uriInfo )
+	public Response post(JAXBElement<Contact> element, @Context UriInfo uriInfo, @Context Request request )
 	{
 		Contact contact = element.getValue();
 		if( dao.find(contact.getId()) != null ){
@@ -122,7 +139,7 @@ public class ContactResource {
 		dao.save( contact );
 		UriBuilder uri = uriInfo.getAbsolutePathBuilder();
 
-		return Response.created(uri.path(contact.getId()+"").build()).build();
+		return Response.created(uri.path(contact.getId()+"").build()).tag(new EntityTag(contact.hashCode()+"")).build();
 	}
 	
 	/**
@@ -136,12 +153,25 @@ public class ContactResource {
 	@PUT
 	@Path("{id}")
 	@Consumes( MediaType.APPLICATION_XML ) 
-	public Response put( @PathParam("id") long id, JAXBElement<Contact> element) throws URISyntaxException
+	public Response put( @PathParam("id") long id, JAXBElement<Contact> element, @Context Request request) throws URISyntaxException
 	{
 		Contact contact = element.getValue();
 		if(contact.getId()==id){
+			
 			dao.update(contact);
-			return Response.ok(new URI("localhost:8080/contacts/"+contact.getId()).toString()).build();
+			
+			EntityTag etag = new EntityTag(contact.hashCode()+"");
+        	ResponseBuilder builder = request.evaluatePreconditions(etag);
+        	
+        	 if(builder == null){
+                 builder = Response.ok(new URI("localhost:8080/contacts/"+contact.getId()).toString());
+                 builder.tag(etag);
+        	 }
+        	
+        	 builder.cacheControl(cc);
+             return builder.build();
+             
+//			return Response.ok(new URI("localhost:8080/contacts/"+contact.getId()).toString()).build();
 		} else
 			return Response.status(Status.BAD_REQUEST).build();
 	
@@ -154,10 +184,22 @@ public class ContactResource {
 	 */
 	@DELETE
 	@Path("{id}")
-	public Response deleteContact( @PathParam("id") long id ){
-		dao.delete(id);
+	public Response deleteContact( @PathParam("id") long id, @Context Request request ){
+		Contact contact = dao.find(id);
+		
 		if(dao.find(id)!=null){
-			return Response.ok().build();
+			dao.delete(id);
+			
+			EntityTag etag = new EntityTag(contact.hashCode()+"");
+        	ResponseBuilder builder = request.evaluatePreconditions(etag);
+        	
+        	 if(builder == null){
+                 builder = Response.ok();
+        	 }
+        	
+             return builder.build();
+             
+//			return Response.ok().build();
 		}
 		
 		return Response.status(Status.NOT_FOUND).build();

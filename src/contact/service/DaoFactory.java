@@ -6,7 +6,7 @@ public abstract class DaoFactory {
 	protected ContactDao daoInstance;
 
 	public static DaoFactory getInstance() {
-		if (factory == null) factory = new contact.service.jpa.JpaDaoFactory();
+		if (factory == null) factory = new contact.service.mem.MemDaoFactory();
 		return factory;
 	}
 

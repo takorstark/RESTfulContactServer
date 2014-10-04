@@ -1,10 +1,13 @@
 package connectserver;
 
+import java.net.URI;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.server.ServerProperties;
 
+import contact.service.DaoFactory;
 import contact.service.mem.MemDaoFactory;
 
 /**
@@ -61,6 +64,7 @@ public class JettyMain {
 	 * On Ubuntu or MacOS if you are not root then you must use a port > 1024.
 	 */
 	static final int PORT = 8080;
+	private static Server server;
 
 	/**
 	 * Create a Jetty server and a context, add Jetty ServletContainer
@@ -116,8 +120,39 @@ public class JettyMain {
 		int ch = System.in.read();
 		System.out.println("Stopping server.");
 		MemDaoFactory.getInstance().shutdown();
+//		server.stop();
+	}
+
+	public static String startServer(int i) throws Exception {
+		int port = i;  // the port the server will listen to for HTTP requests
+		server = new Server( i );
+		
+		ServletContextHandler context = new ServletContextHandler( ServletContextHandler.SESSIONS );
+		
+		context.setContextPath("/");
+		
+		ServletHolder holder = new ServletHolder( org.glassfish.jersey.servlet.ServletContainer.class );
+		
+		holder.setInitParameter(ServerProperties.PROVIDER_PACKAGES, "contact.resource");
+		context.addServlet( holder, "/*" );
+
+		server.setHandler( context );
+		
+		System.out.println("Starting Jetty server on port " + port);
+		server.start();
+		
+		return new URI("http://127.0.0.1:" + port + "/").toString();
+	}
+	
+	public static void stopServer() throws Exception {
+		try {
+			MemDaoFactory.getInstance().shutdown();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		server.stop();
 	}
+
 	
 }
 

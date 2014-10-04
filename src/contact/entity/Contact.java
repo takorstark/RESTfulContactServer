@@ -14,6 +14,18 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name="contact")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Contact implements Serializable {
+	
+	@Override
+	public int hashCode() {
+		long hashCode = 1;
+		hashCode = 31 * hashCode + id;
+		hashCode = 31 * hashCode + (name == null ? 0 : name.hashCode());
+		hashCode = 31 * hashCode + (title == null ? 0 : title.hashCode());
+		hashCode = 31 * hashCode + (email == null ? 0 :email.hashCode());
+		hashCode = 31 * hashCode + (photoUrl == null ? 0 :photoUrl.hashCode());
+		return (int)hashCode;
+	}
+
 	private static final long serialVersionUID = 1L;
 
 	@XmlAttribute

@@ -4,6 +4,7 @@ import java.util.List;
 
 import contact.entity.Contact;
 
+
 public interface ContactDao {
 
 	/** Find a contact by ID in contacts.
