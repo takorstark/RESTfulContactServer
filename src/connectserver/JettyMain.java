@@ -1,4 +1,5 @@
 package connectserver;
+// Wrong Package: should be contact.(something)
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;

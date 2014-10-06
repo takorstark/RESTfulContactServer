@@ -34,12 +34,13 @@ public class MemDaoFactory extends DaoFactory {
 	 * Get the instance of DaoFactory.
 	 * @return instance of DaoFactory.
 	 */
-	public static MemDaoFactory getInstance() {
-		if ( factory == null ) {
-			factory = new MemDaoFactory();
-		}
-		return factory;
-	}
+//This method should be only in DaoFactory
+//	public static MemDaoFactory getInstance() {
+//		if ( factory == null ) {
+//			factory = new MemDaoFactory();
+//		}
+//		return factory;
+//	}
 	
 	
 	/**
@@ -60,6 +61,7 @@ public class MemDaoFactory extends DaoFactory {
 		JAXBContext ctx;
 		try {
 			ctx = JAXBContext.newInstance( ContactXml.class ); 
+// What if user's system doesn't have a /tmp directory?
 			File outputFile = new File( "/tmp/ContactsSevicePersistence.xml" );
 			Marshaller marshaller = ctx.createMarshaller();	
 			marshaller.marshal( exportContacts, outputFile );

@@ -27,6 +27,7 @@ import contact.entity.Contact;
 import contact.service.ContactDao;
 import contact.service.mem.MemDaoFactory;
 
+// This comment is vague. Doesn't say what this class actually does.
 /**
  * ContactResource provides RESTful web resources using JAX-RS
  * 
@@ -37,7 +38,8 @@ import contact.service.mem.MemDaoFactory;
  */
 @Path("/contacts")
 public class ContactResource {
-	
+// Don't use MemDaoFactory use DaoFactory
+
 	private ContactDao dao = MemDaoFactory.getInstance().getContactDao();
 	
 	public ContactResource() {
@@ -86,7 +88,9 @@ public class ContactResource {
 		if(title==null){
 			return getContacts();
 		}
-		
+// DON'T do this. Let ContactDao perform the match which is much more efficient
+// since it will create fewer objects.  
+// See ContactDao.findByTitle()
 		List<Contact> contactList1 = dao.findAll();
 		List<Contact> contactList2 = new ArrayList<Contact>(); 
 		for(int i=0; i<contactList1.size(); i++){
@@ -94,7 +98,6 @@ public class ContactResource {
 				contactList2.add(contactList1.get(i));
 			}
 		}
-		
 		if(contactList2.size()==0)
 			return Response.status(Status.NOT_FOUND).build();
 		
@@ -141,6 +144,7 @@ public class ContactResource {
 		Contact contact = element.getValue();
 		if(contact.getId()==id){
 			dao.update(contact);
+//BAD CODE. Use uriInfo
 			return Response.ok(new URI("localhost:8080/contacts/"+contact.getId()).toString()).build();
 		} else
 			return Response.status(Status.BAD_REQUEST).build();
@@ -156,6 +160,7 @@ public class ContactResource {
 	@Path("{id}")
 	public Response deleteContact( @PathParam("id") long id ){
 		dao.delete(id);
+//LOGIC ERROR.
 		if(dao.find(id)!=null){
 			return Response.ok().build();
 		}

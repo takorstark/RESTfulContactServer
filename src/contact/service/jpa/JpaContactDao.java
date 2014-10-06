@@ -86,6 +86,7 @@ public class JpaContactDao implements ContactDao {
 	 * @see contact.service.ContactDao#delete(long)
 	 */
 	public boolean delete(long id) {
+// Use try-catch and rollback
 		em.getTransaction().begin();
 		Contact contactDel = find(id);
 		if(contactDel==null)
@@ -117,10 +118,13 @@ public class JpaContactDao implements ContactDao {
 	 * @see contact.service.ContactDao#update(contact.entity.Contact)
 	 */
 	public boolean update(Contact update) {
+// Use try-catch and rollback
 		em.getTransaction().begin();
+// The contact_class variable is useless.
 		Class contact_class = Contact.class;
 		if( em.find( contact_class, update.getId() ) ){
 			em.merge(update);
+// You forgot to commit the transaction
 			return true;
 		}	
 		return false;
